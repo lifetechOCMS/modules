@@ -1,0 +1,131 @@
+{! import('md_mvc_lifetech_lms_blacklist', 'controllers_md_mvc_lifetech_lms_blacklist.php') !}
+{! import('md_mvc_lifetech_lms_blacklist', 'mvc_lifetech_blacklist_styles.css') !}
+{% $load_model_blacklistMisconducts =  md_mvc_lifetech_lms_blacklist::blacklist_misconduct_retrieve_all_record() %}
+{% $datareturned_blacklistMisconducts = use_liferazor($load_model_blacklistMisconducts) %}
+
+{% $load_model_blacklistCategory =  md_mvc_lifetech_lms_blacklist::blacklist_category_retrieve_all_record() %}
+{% $datareturned_blacklistCategory = use_liferazor($load_model_blacklistCategory) %}
+{% $counter = 1 %}
+<section class="bg-light py-3 py-md-5">
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+          <div class="card">
+              <div class="card-body">
+
+                  <h4 class="card-title">Blacklist Misconduct </h4>
+                  <div style="margin-bottom: 20px; margin-top: 20px;"><button class="btn btn-primary waves-effect waves-light" onclick="initAddNewMisconduct()" data-bs-toggle="modal" data-bs-target="#addUserModal" data-bs-backdrop='static' data-bs-keyboard='false'><i class="fas fa-plus"></i> Add New</button></div>
+<table id="example" class="table table-striped" style="width:100%">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Date Created</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+          {% foreach ($datareturned_blacklistMisconducts as $data): %}
+              <tr>
+                  <td >{! $counter !}</td>
+                  <td >{! $data->title !}</td>
+                  <td >
+                    {% foreach ($datareturned_blacklistCategory as $category): %}
+                      {% if($data->category_id == $category->lifetech_general_id): %}
+                        {! $category->title!}
+                      {% endif %}
+                    {% endforeach %}
+                  </td>
+                  {% if($data->status == "1"): %}
+                    <td>Enabled</td>
+                  {% elseif ($data->status == "0"): %}
+                    <td>Disabled</td>
+                  {% endif %}
+                  <td >{! $data->date_created !}</td>
+                  <td>
+                    <button type="button" class="btn btn-primary" name="button" onclick="editBlacklistMisconduct({! $data->lifetech_general_id!})"  data-bs-toggle="modal" data-bs-target="#addUserModal" data-bs-backdrop='static' data-bs-keyboard='false' title="Click to edit"> <i class="fa fa-edit"></i></button>
+                    {% if($data->status == "1"): %}
+                    <button type="button" class="btn btn-warning" id="{! $data->lifetech_general_id!}" name="button" data-id="{! $data->status!}" onclick="changeStatusBlacklistMisconduct({! $data->lifetech_general_id!})" title="Click to disable"> <i class="fa fa-lock-open"></i></button>
+                    {% elseif ($data->status == "0"): %}
+                    <button type="button" class="btn btn-warning" id="{! $data->lifetech_general_id!}" name="button"  data-id="{! $data->status!}" onclick="changeStatusBlacklistMisconduct({! $data->lifetech_general_id!})" title="Click to enable"> <i class="fa fa-lock"></i></button>
+                    {% endif %}
+                    <button type="button" class="btn btn-danger" name="button"  onclick="deleteBlacklistMisconduct({! $data->lifetech_general_id!})" title="Click to delete"> <i class="fa fa-trash"></i></button>
+                  </td>
+
+                </tr>
+                {% $counter++ %}
+            {% endforeach %}
+
+        </tbody>
+        <tfoot>
+            <tr>
+              <th>#</th>
+              <th>Title</th>
+              <th>Category</th>
+              <th>Status</th>
+              <th>Date Created</th>
+              <th>Action</th>
+            </tr>
+        </tfoot>
+    </table>
+
+              </div>
+          </div>
+      </div>
+  </div>
+  </div>
+</section>
+
+
+
+
+<!-- new modal content -->
+<!--ADD USER MODAL-->
+<div id="addUserModal" class="modal fade" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title mt-0" id="myModalLabel">New Blacklist Misconduct</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"
+                  aria-label="Close"></button>
+          </div>
+          <!--modal-body -->
+          <div class="modal-body">
+
+              <form class="form-horizontal" id="frmBlacklistMisconduct" action="" method="post">
+                <div class="mb-3">
+                    <label class="form-label" for="blacklistMisconductCategory">Category *</label>
+                    <select id="blacklistMisconductCategory" name="blacklistMisconductCategory" class="form-control" required>
+                        <option value="">-- Select Category --</option>
+                        {% foreach ($datareturned_blacklistCategory as $data): %}
+                          <option value="{! $data->lifetech_general_id !}">{! $data->title !}</option>
+                        {% endforeach %}
+                    </select>
+                </div>
+                  <div class="mb-3">
+                      <label class="form-label" for="blacklistMisconductTitle">Title *</label>
+                      <input type="text" class="form-control" id="blacklistMisconductTitle" name="blacklistMisconductTitle" placeholder="Enter Misconduct Title" >
+                  </div>
+                  <div class="mb-3">
+                      <label class="form-label" for="blacklistMisconductDescr">Description (optional)</label>
+                      <textarea id="blacklistMisconductDescr" name="blacklistMisconductDescr" class="form-control" rows="2" cols="20" placeholder="Enter Misconduct Description (Optional)"></textarea>
+                  </div>
+
+              </div><!-- /.modal-body -->
+              <div class="modal-footer">
+                <input type="hidden" class="form-control" id="blacklistMisconductAction" name="blacklistMisconductAction" value="">
+                <input type="hidden" class="form-control" id="editIDMisconduct" name="id" value="">
+                  <button type="button" class="btn btn-danger waves-effect" data-bs-dismiss="modal">Close</button>
+                  <button type="button" class="btn btn-primary waves-effect waves-light" id="btnAddBlacklistMisconduct" name="btnAddBlacklistMisconduct">Submit</button>
+                  <button type="button" class="btn btn-primary waves-effect waves-light hidden" id="btnUpdateBlacklistMisconduct" name="btnUpdateBlacklistMisconduct">Update</button>
+              </div>
+          </form>
+
+      </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+{! import('md_mvc_lifetech_lms_blacklist', 'mvc_lifetech_blacklist_scripts.js') !}
+
+      

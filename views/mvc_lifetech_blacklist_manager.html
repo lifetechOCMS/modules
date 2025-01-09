@@ -1,0 +1,188 @@
+{! import('md_mvc_lifetech_lms_blacklist', 'controllers_md_mvc_lifetech_lms_blacklist.php') !}
+{! import('md_mvc_lifetech_lms_blacklist', 'mvc_lifetech_blacklist_styles.css') !}
+{% $load_model_blacklistEntrys =  md_mvc_lifetech_lms_blacklist::blacklist_entry_retrieve_all_record() %}
+{% $datareturned_blacklistEntrys = use_liferazor($load_model_blacklistEntrys) %}
+
+{% $load_model_blacklistCategory =  md_mvc_lifetech_lms_blacklist::blacklist_category_retrieve_all_record() %}
+{% $datareturned_blacklistCategory = use_liferazor($load_model_blacklistCategory) %}
+
+{% $load_model_blacklistLevel =  md_mvc_lifetech_lms_blacklist::blacklist_level_retrieve_all_record() %}
+{% $datareturned_blacklistLevel = use_liferazor($load_model_blacklistLevel) %}
+
+{% $load_model_blacklistSemester =  md_mvc_lifetech_lms_blacklist::blacklist_semester_retrieve_all_record() %}
+{% $datareturned_blacklistSemester = use_liferazor($load_model_blacklistSemester) %}
+
+{% $load_model_blacklistSession =  md_mvc_lifetech_lms_blacklist::blacklist_session_retrieve_all_record() %}
+{% $datareturned_blacklistSession = use_liferazor($load_model_blacklistSession) %}
+{% $counter = 1 %}
+<section class="bg-light py-3 py-md-5">
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+          <div class="card">
+              <div class="card-body">
+
+                  <h4 class="card-title">Manage Blacklist </h4>
+                  <div style="margin-bottom: 20px; margin-top: 20px;"><button class="btn btn-primary waves-effect waves-light" onclick="initAddNewEntry()" data-bs-toggle="modal" data-bs-target="#addUserModal" data-bs-backdrop='static' data-bs-keyboard='false'><i class="fas fa-plus"></i> Add New</button></div>
+<table id="example" class="table table-striped" style="width:100%">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Matric No.</th>
+                <th>Misconduct Category</th>
+                <th>Status</th>
+                <th>Date Created</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+          {% foreach ($datareturned_blacklistEntrys as $data): %}
+              <tr>
+                  <td >{! $counter !}</td>
+                  <td >{! $data->lifetech_matno !}</td>
+                  <td >
+                    {% foreach ($datareturned_blacklistCategory as $category): %}
+                      {% if($data->category_id == $category->lifetech_general_id): %}
+                        {! $category->title!}
+                      {% endif %}
+                    {% endforeach %}
+                  </td>
+                  {% if($data->status == "1"): %}
+                    <td>Enabled</td>
+                  {% elseif ($data->status == "0"): %}
+                    <td>Disabled</td>
+                  {% endif %}
+                  <td >{! $data->date_created !}</td>
+                  <td>
+                    <button type="button" class="btn btn-primary" name="button" onclick="editBlacklistEntry({! $data->lifetech_general_id!})"  data-bs-toggle="modal" data-bs-target="#addUserModal" data-bs-backdrop='static' data-bs-keyboard='false' title="Click to edit"> <i class="fa fa-edit"></i></button>
+                    {% if($data->status == "1"): %}
+                    <button type="button" class="btn btn-warning" id="{! $data->lifetech_general_id!}" name="button" data-id="{! $data->status!}" onclick="changeStatusBlacklistEntry({! $data->lifetech_general_id!})" title="Click to disable"> <i class="fa fa-lock-open"></i></button>
+                    {% elseif ($data->status == "0"): %}
+                    <button type="button" class="btn btn-warning" id="{! $data->lifetech_general_id!}" name="button"  data-id="{! $data->status!}" onclick="changeStatusBlacklistEntry({! $data->lifetech_general_id!})" title="Click to enable"> <i class="fa fa-lock"></i></button>
+                    {% endif %}
+                    <button type="button" class="btn btn-danger" name="button"  onclick="deleteBlacklistEntry({! $data->lifetech_general_id!})" title="Click to delete"> <i class="fa fa-trash"></i></button>
+                  </td>
+
+                </tr>
+                {% $counter++ %}
+            {% endforeach %}
+
+        </tbody>
+        <tfoot>
+            <tr>
+              <th>#</th>
+              <th>Matric No.</th>
+              <th>Misconduct Category</th>
+              <th>Status</th>
+              <th>Date Created</th>
+              <th>Action</th>
+            </tr>
+        </tfoot>
+    </table>
+
+              </div>
+          </div>
+      </div>
+  </div>
+  </div>
+</section>
+
+
+
+
+<!-- new modal content -->
+<!--ADD USER MODAL-->
+<div id="addUserModal" class="modal fade" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title mt-0" id="myModalLabel">New Blacklist</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"
+                  aria-label="Close"></button>
+          </div>
+          <!--modal-body -->
+          <div class="modal-body">
+
+              <form class="form-horizontal" id="frmBlacklistEntry" action="" method="post">
+
+                  <div class="mb-3">
+                      <label class="form-label" for="blacklistEntryMatricNo">Matriculation Number *</label>
+                      <input type="text" class="form-control" id="blacklistEntryMatricNo" name="blacklistEntryMatricNo" placeholder="Enter Entry Title" >
+                      <div style="margin-top:10px;">
+                        <button type="button" class="btn btn-success" id="blacklistEntryValidate" name="blacklistEntryValidate">Validate</button>
+                        <span id="studentDetails"></span>
+                        <input type="hidden" name="validateChecker" id="validateChecker" value="0">
+                      </div>
+                  </div>
+                  <div class="mb-3">
+                      <div class="row">
+                          <div class="col-md-6 col-lg-6 col-xl-6">
+                            <label class="form-label" for="blacklistEntryCategory">Category *</label>
+                            <select id="blacklistEntryCategory" name="blacklistEntryCategory" class="form-control" required>
+                                <option value="">-- Select Category --</option>
+                                {% foreach ($datareturned_blacklistCategory as $data): %}
+                                  <option value="{! $data->lifetech_general_id !}">{! $data->title !}</option>
+                                {% endforeach %}
+                            </select>
+                          </div>
+                          <div class="col-md-6 col-lg-6 col-xl-6">
+                            <label class="form-label" for="blacklistEntryMisconduct">Misconduct *</label>
+                            <select id="blacklistEntryMisconduct" name="blacklistEntryMisconduct" class="form-control" required>
+                                <option value="">-- Select Misconduct --</option>
+                            </select>
+                          </div>
+                      </div>
+                  </div>
+                  <div class="mb-3">
+                      <label class="form-label" for="blacklistEntryDescr">Misconduct Description *</label>
+                      <textarea id="blacklistEntryDescr" name="blacklistEntryDescr" class="form-control" rows="2" cols="20" placeholder="Detail Misconduct" required></textarea>
+                  </div>
+                  <div class="mb-3">
+                      <label class="form-label" for="blacklistEntryLevel">Level *</label>
+                      <select id="blacklistEntryLevel" name="blacklistEntryLevel" class="form-control" required>
+                          <option value="">-- Select Level --</option>
+                          {% foreach ($datareturned_blacklistLevel as $data): %}
+                            <option value="{! $data->lifetech_general_id !}">{! $data->lifetech_add_level !}</option>
+                          {% endforeach %}
+                      </select>
+                  </div>
+                  <div class="mb-3">
+                      <div class="row">
+                          <div class="col-md-6 col-lg-6 col-xl-6">
+                            <label class="form-label" for="blacklistEntrySemester">Semester *</label>
+                            <select id="blacklistEntrySemester" name="blacklistEntrySemester" class="form-control" required>
+                                <option value="">-- Select Semester --</option>
+                                {% foreach ($datareturned_blacklistSemester as $data): %}
+                                  <option value="{! $data->lifetech_general_id !}">{! $data->lifetech_semester !}</option>
+                                {% endforeach %}
+                            </select>
+                          </div>
+                          <div class="col-md-6 col-lg-6 col-xl-6">
+                            <label class="form-label" for="blacklistEntrySession">Session *</label>
+                            <select id="blacklistEntrySession" name="blacklistEntrySession" class="form-control" required>
+                                <option value="">-- Select Session --</option>
+                                {% foreach ($datareturned_blacklistSession as $data): %}
+                                  <option value="{! $data->lifetech_general_id !}">{! $data->lifetech_session !}</option>
+                                {% endforeach %}
+                            </select>
+                          </div>
+                      </div>
+                  </div>
+
+              </div><!-- /.modal-body -->
+              <div class="modal-footer">
+                <input type="hidden" class="form-control" id="blacklistEntryAction" name="blacklistEntryAction" value="">
+                <input type="hidden" class="form-control" id="editIDEntry" name="id" value="">
+                  <button type="button" class="btn btn-danger waves-effect" data-bs-dismiss="modal">Close</button>
+                  <button type="button" class="btn btn-primary waves-effect waves-light" id="btnAddBlacklistEntry" name="btnAddBlacklistEntry">Submit</button>
+                  <button type="button" class="btn btn-primary waves-effect waves-light hidden" id="btnUpdateBlacklistEntry" name="btnUpdateBlacklistEntry">Update</button>
+              </div>
+          </form>
+
+      </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+{! import('md_mvc_lifetech_lms_blacklist', 'mvc_lifetech_blacklist_scripts.js') !}
+
+      
+      

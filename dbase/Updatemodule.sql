@@ -1,0 +1,1 @@
+UPDATE module_tbl SET module_name='md_mvc_lifetech_lms_blacklist',module_image='N',status='Enabled',date_created='2025-01-08 11:49:26',last_update='2025-01-09 12:19:30'WHERE module_name='md_mvc_lifetech_lms_blacklist';;;;;_lifetechend;;;;;

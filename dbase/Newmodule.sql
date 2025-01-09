@@ -1,0 +1,1 @@
+INSERT INTO module_tbl(module_name, module_image, status, date_created, last_update) VALUES('md_mvc_lifetech_lms_blacklist','N','Enabled','2025-01-08 11:49:26','2025-01-09 12:19:30');;;;;_lifetechend;;;;;
